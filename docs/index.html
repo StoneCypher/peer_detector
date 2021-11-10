@@ -1,51 +1,109 @@
+<!doctype html>
 <html>
-  <body>
-    <style>
+
+  <head>
+
+    <style type="text/css">
+
+      html, body, h1, h2, p {
+        border  : 0;
+        margin  : 0;
+        padding : 0;
+      }
+
+      body { padding: 2em; }
+      p+h1 { margin-top: 2em; }
+      h1+p { margin-top: 1em; }
+      p+p  { margin-top: 1em; }
+
       #outgoing {
         width: 600px;
         word-wrap: break-word;
         white-space: normal;
       }
+
       #signal1, #signal2 {
         white-space: pre;
         font-family: monospace;
       }
+
+
     </style>
-    <form>
-      <p id="signal1"></p>
-      <p id="signal2"></p>
-    </form>
-    <pre id="outgoing"></pre>
-    <script src="simplepeer.min.js"></script>
-    <script>
-var Peer = window.SimplePeer
 
-var peer1 = new Peer({ initiator: true })
-var peer2 = new Peer()
+    <script type="text/javascript" src="simplepeer.min.js"></script>
 
-const byId = id => document.getElementById(id);
+    <script defer type="text/javascript">
 
-peer1.on('signal', data => {
-  // when peer1 has signaling data, give it to peer2 somehow
-  byId('signal1').innerHTML = JSON.stringify(data, undefined, 2);
-  peer2.signal(data)
-})
+      const byId = id => document.getElementById(id);
 
-peer2.on('signal', data => {
-  // when peer2 has signaling data, give it to peer1 somehow
-  byId('signal2').innerHTML = JSON.stringify(data, undefined, 2);
-  peer1.signal(data)
-})
+      let Peer,
+          peer1,
+          peer2,
+          worked,
 
-peer1.on('connect', () => {
-  // wait for 'connect' event before using the data channel
-  peer1.send('hey peer2, how is it going?')
-})
+          browser,
+          ver,
+          os;
 
-peer2.on('data', data => {
-  // got a data channel message
-  console.log('got a message from peer1: ' + data)
-})
+      function bootstrap() {
+
+        Peer  = window.SimplePeer;
+
+        peer1 = new Peer({ initiator: true });
+        peer2 = new Peer();
+
+        // when peer1 has signaling data, give it to peer2 somehow
+        peer1.on('signal', data => {
+          byId('signal1'       ).innerHTML = JSON.stringify(data, undefined, 2);
+          byId('signal1_length').innerHTML = `Byte length: ${JSON.stringify(data).length.toString()}`;
+          peer2.signal(data)
+        });
+
+        // when peer2 has signaling data, give it to peer1 somehow
+        peer2.on('signal', data => {
+          byId('signal2'       ).innerHTML = JSON.stringify(data, undefined, 2);
+          byId('signal2_length').innerHTML = `Byte length: ${JSON.stringify(data).length.toString()}`;
+          peer1.signal(data)
+        });
+
+        // wait for 'connect' event before using the data channel
+        peer1.on('connect', () => {
+          peer1.send('hey peer2, how is it going?')
+        });
+
+        // got a data channel message
+        peer2.on('data', data => {
+          worked = data === 'hey peer2, how is it going?';
+          byId('channel_works').className = (worked? 'works' : 'not_works');
+        });
+
+      }
+
+      window.onload = bootstrap;
+
     </script>
+
+  </head>
+
+  <body>
+
+    <form>
+      <h1>Offer</h1>
+      <p id="signal1_length"></p>
+      <p id="signal1"></p>
+      <h1>Response</h1>
+      <p id="signal2_length"></p>
+      <p id="signal2"></p>
+      <h1>Channel</h1>
+      <p id="channel_works">
+        <span id="waiting">Waiting on a response &hellip;</span>
+        <span id="works">Works!</span>
+        <span id="not_works">Broken 😥</span>
+      </p>
+    </form>
+
+    <pre id="outgoing"></pre>
+
   </body>
+
 </html>
