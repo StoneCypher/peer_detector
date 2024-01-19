@@ -1,5 +1,21 @@
 {
+  "name": "peer_detector",
+  "description": "Let's automatically detect the behavior of both sides of a WebRTC SDP peering, then audit the browser and file it as an issue",
+  "version": "0.1.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "clean": "rimraf docs && mkdir docs && cp ./src/site/* ./docs/ && cp ./node_modules/platform/platform.js ./docs/",
+    "build": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "John Haugeland <stonecypher@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
+    "platform": "^1.3.6",
+    "rimraf": "^5.0.5",
     "ua-parser-js": "^1.0.2"
   }
 }
