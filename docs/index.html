@@ -5,20 +5,23 @@
 
     <link rel="stylesheet" type="text/css" href="index.css" />
 
+    <script defer type="text/javascript" src="platform.js"></script>
     <script defer type="text/javascript" src="simplepeer.min.js"></script>
     <script defer type="text/javascript" src="index.js"></script>
-    <script src="platform.js"></script>
 
   </head>
 
   <body>
 
-    <div id="browser_id"></div>
-
     <form>
 
-      <p>We want the green one (host) and the blue one (client).</p>
+      <p>We want the browser string, and the contents of the green box (host) and the blue box (client).</p>
       <br/><br/>
+
+      <div id="browser_id"></div>
+
+      <div id="preferred_outcomes">
+      </div>
 
       <div id="outcomes">
       </div>

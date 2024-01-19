@@ -1,3 +1,4 @@
+
 const byId = id => document.getElementById(id);
 
 let Peer,
@@ -13,57 +14,25 @@ let Peer,
 
 
 
-navigator.sayswho = function() {
-
-  let ua = navigator.userAgent,
-      tem,
-      M  = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-
-    if (/trident/i.test(M[1])) {
-      tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-      return 'IE '+(tem[1] || '');
-    }
-
-    if (M[1]=== 'Chrome') {
-      tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
-      if (tem!= null) {
-        return tem.slice(1).join(' ').replace('OPR', 'Opera');
-      }
-    }
-
-    M = M[2]
-      ? [M[1], M[2]]
-      : [navigator.appName, navigator.appVersion, '-?'];
-
-    if ( (tem = ua.match(/version\/(\d+)/i)) != null) {
-      M.splice(1, 1, tem[1]);
-    }
-
-    return M.join(' ');
-
-};
-
-
-
-
-
 function bootstrap() {
 
-  document.getElementById('browser_id').innerHTML = navigator.sayswho();
+  document.getElementById('browser_id').innerHTML = `${platform.name} ${platform.version} ${platform.os}`;
 
   Peer  = window.SimplePeer;
 
   peer1 = new Peer({ initiator: true });
   peer2 = new Peer();
 
-  const outcomes = document.getElementById('outcomes');
+  const preferred_outcomes = document.getElementById('preferred_outcomes'),
+        outcomes           = document.getElementById('outcomes');
 
 
 
   // when peer1 has signaling data, give it to peer2 somehow
   peer1.on('signal', data => {
 
-    const box = document.createElement('div');
+    const box       = document.createElement('div'),
+          is_opener = data.type === 'offer';
 
     switch (data.type) {
 
@@ -82,7 +51,7 @@ function bootstrap() {
     }
 
     const h = document.createElement('h1');
-    h.innerHTML = data.type === 'offer'? 'Opening offer' : 'Candidate offer';
+    h.innerHTML = is_opener? 'Opening offer' : 'Candidate offer';
 
     const l = document.createElement('p');
     l.innerHTML = `Byte length: ${JSON.stringify(data).length.toString()}`;
@@ -91,7 +60,7 @@ function bootstrap() {
     o.innerHTML = JSON.stringify(data, undefined, 2);
 
     [h,l,o].forEach(el => box.appendChild(el));
-    outcomes.appendChild(box);
+    (is_opener? preferred_outcomes : outcomes).appendChild(box);
 
     peer2.signal(data);
 
@@ -102,7 +71,8 @@ function bootstrap() {
   // when peer2 has signaling data, give it to peer1 somehow
   peer2.on('signal', data => {
 
-    const box = document.createElement('div');
+    const box       = document.createElement('div'),
+          is_opener = data.type === 'answer';
 
     switch (data.type) {
 
@@ -121,7 +91,7 @@ function bootstrap() {
     }
 
     const h = document.createElement('h1');
-    h.innerHTML = data.type === 'answer'? 'Opening response' : 'Candidate response';
+    h.innerHTML = is_opener? 'Opening response' : 'Candidate response';
 
     const l = document.createElement('p');
     l.innerHTML = `Byte length: ${JSON.stringify(data).length.toString()}`;
@@ -130,7 +100,7 @@ function bootstrap() {
     o.innerHTML = JSON.stringify(data, undefined, 2);
 
     [h,l,o].forEach(el => box.appendChild(el));
-    outcomes.appendChild(box);
+    (is_opener? preferred_outcomes : outcomes).appendChild(box);
 
     peer1.signal(data);
 
